@@ -19,9 +19,9 @@ class Program
     const string ORIGIN_DOMAIN = "z-library.sk"; // 原始域名
     static async Task Main()
     {
-        var html = await Tool.Test();
-        Console.WriteLine(html);
-        await Tool.DownloadBook("958697", "Downloads");
+        //var html = await Tool.Test();
+        //Console.WriteLine(html);
+        await Tool.DownloadBook("https://z-library.sk/dl/5602260/6d6b02", "Downloads");
     }
 
     //static async Task Main()
