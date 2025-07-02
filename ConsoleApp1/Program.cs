@@ -9,6 +9,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Zlibrary.Noproxy;
 
@@ -19,117 +20,338 @@ class Program
     const string ORIGIN_DOMAIN = "z-library.sk"; // 原始域名
     static async Task Main()
     {
-        //var html = await Tool.Test();
-        //Console.WriteLine(html);
-        await Tool.DownloadBook("https://z-library.sk/dl/5602260/6d6b02", "Downloads");
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        
+        // 使用简单的ASCII艺术文本替代Figgle
+        Console.WriteLine(@"
+    _________            ______               _____   ___ __                             ______            __
+   / ____/ (_)___  _____/ ____/___  __  __   /__  /  / (_) /_  _________ ________  __   /_  __/___  ____  / /
+  / __/ / / / __ \/ ___/ /_  / __ \/ / / /     / /  / / / __ \/ ___/ __ `/ ___/ / / /    / / / __ \/ __ \/ / 
+ / /___/ / / /_/ / /  / __/ / /_/ / /_/ /     / /__/ / / /_/ / /  / /_/ / /  / /_/ /    / / / /_/ / /_/ / /  
+/_____/_/_/\____/_/  /_/    \____/\__, /     /____/_/_/_.___/_/   \__,_/_/   \__, /    /_/  \____/\____/_/   
+                                 /____/                                     /____/                           
+");
+        
+        try
+        {
+            while (true)
+            {
+                Console.WriteLine("\n===== Z-Library 图书搜索 =====");
+                
+                // 获取搜索关键词
+                Console.Write("请输入搜索关键词（输入'exit'退出）: ");
+                string keyword = SafeReadLineWithRetry();
+                
+                if (string.IsNullOrWhiteSpace(keyword) || keyword.ToLower() == "exit")
+                {
+                    Console.WriteLine("程序已退出。");
+                    break;
+                }
+                
+                int currentPage = 1;
+                List<BookInfo> books = null;
+                
+                while (true)
+                {
+                    Console.WriteLine($"\n正在搜索 \"{keyword}\"，第 {currentPage} 页...");
+                    
+                    try
+                    {
+                        // 搜索书籍
+                        books = await Tool.SearchBooks(keyword, currentPage);
+                        
+                        if (books.Count == 0)
+                        {
+                            Console.WriteLine("没有找到相关书籍。");
+                            break;
+                        }
+                        
+                        // 显示搜索结果
+                        Console.WriteLine($"\n找到 {books.Count} 本书籍:");
+                        
+                        for (int i = 0; i < books.Count; i++)
+                        {
+                            var book = books[i];
+                            Console.WriteLine($"{i + 1}. {book.Title} - {book.Author} ({book.Year}) [{book.Extension}] {book.FileSize}");
+                        }
+                        
+                        // 用户操作菜单
+                        Console.WriteLine("\n操作选项:");
+                        Console.WriteLine("- 输入数字(1-{0})选择要下载的书籍", books.Count);
+                        Console.WriteLine("- 输入'n'查看下一页");
+                        Console.WriteLine("- 输入'p'查看上一页");
+                        Console.WriteLine("- 输入'q'返回搜索");
+                        
+                        Console.Write("\n请选择操作: ");
+                        string choice = SafeReadLineWithRetry().Trim().ToLower();
+                        
+                        if (choice == "q")
+                        {
+                            // 返回搜索
+                            break;
+                        }
+                        else if (choice == "n")
+                        {
+                            // 下一页
+                            currentPage++;
+                        }
+                        else if (choice == "p")
+                        {
+                            // 上一页
+                            if (currentPage > 1)
+                            {
+                                currentPage--;
+                            }
+                            else
+                            {
+                                Console.WriteLine("已经是第一页了。");
+                            }
+                        }
+                        else if (int.TryParse(choice, out int bookIndex) && bookIndex >= 1 && bookIndex <= books.Count)
+                        {
+                            // 下载选中的书籍
+                            var selectedBook = books[bookIndex - 1];
+                            
+                            // 确认下载
+                            Console.WriteLine($"\n您选择了: {selectedBook.Title} - {selectedBook.Author}");
+                            Console.Write("确认下载? (y/n): ");
+                            
+                            if (SafeReadLineWithRetry().Trim().ToLower() == "y")
+                            {
+                                // 创建下载目录
+                                string downloadDir = "Downloads";
+                                if (!Directory.Exists(downloadDir))
+                                {
+                                    Directory.CreateDirectory(downloadDir);
+                                }
+                                
+                                Console.WriteLine($"\n开始下载 \"{selectedBook.Title}\"...");
+                                
+                                try
+                                {
+                                    bool success = await Tool.DownloadBook(selectedBook, downloadDir);
+                                    
+                                    if (success)
+                                    {
+                                        Console.WriteLine($"\n下载完成！文件已保存到 {downloadDir} 目录。");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("\n下载失败。");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"\n下载过程中出错: {ex.Message}");
+                                }
+                                
+                                Console.WriteLine("\n按任意键继续...");
+                                SafeReadKeyWithRetry();
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("无效的选择，请重试。");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"发生错误: {ex.Message}");
+                        break;
+                    }
+                }
+            }
+        }
+        catch (IOException ex) when (ex.Message.Contains("管道的另一端上无任何进程"))
+        {
+            // 在非交互式环境中，使用默认值进行测试
+            Console.WriteLine("检测到非交互式环境，将使用默认值进行测试。");
+            await RunNonInteractiveTest();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"程序发生异常: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+        }
     }
-
-    //static async Task Main()
-    //{
-    //    // 创建自定义HttpClientHandler
-    //    var handler = new SocketsHttpHandler
-    //    {
-    //        // 禁用证书验证
-    //        SslOptions = new SslClientAuthenticationOptions
-    //        {
-    //            RemoteCertificateValidationCallback = (_, _, _, _) => true,
-    //            TargetHost = TARGET_DOMAIN
-    //        },
-    //        ConnectCallback = async (context, cancellationToken) =>
-    //        {
-    //            var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-    //            await socket.ConnectAsync(IPAddress.Parse(ACTUAL_IP), context.DnsEndPoint.Port, cancellationToken);
-    //            var stream = new NetworkStream(socket, ownsSocket: true);
-
-    //            // 创建SSL流并手动认证
-    //            var sslStream = new SslStream(stream, false,
-    //                (_, _, _, _) => true); // 证书验证回调
-
-    //            await sslStream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
-    //            {
-    //                TargetHost = TARGET_DOMAIN,
-    //                EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
-    //                CertificateRevocationCheckMode = X509RevocationMode.NoCheck
-    //            }, cancellationToken);
-
-    //            return sslStream;
-    //        }
-    //    };
-
-    //    // 创建HttpClient
-    //    using var client = new HttpClient(handler);
-
-    //    // 设置请求头
-    //    client.DefaultRequestHeaders.Add("Host", ORIGIN_DOMAIN);
-    //    client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Not A(Brand\";v=\"99\", \"Google Chrome\";v=\"121\", \"Chromium\";v=\"121\"");
-    //    client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
-    //    client.DefaultRequestHeaders.Add("Referer", "https://z-library.sk/s/maui?page=2");
-    //    client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
-    //    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36");
-    //    client.Timeout = TimeSpan.FromSeconds(10);
-
-    //    // 准备请求数据
-    //    var requestData = new
-    //    {
-    //        bookIds = new List<string>
-    //        {
-    //            "21461955", "2052226", "27250476", "25286505", "5419633",
-    //            "2531163", "2948536", "4531230", "97918590", "5038224",
-    //            "969382", "25038925", "27410814", "1627066", "4349316",
-    //            "24168681", "6110868", "21636412", "21636415", "21636418"
-    //        }
-    //    };
-
-    //    var url = $"https://{ACTUAL_IP}/papi/book/recommended/mosaic/30";
-
-    //    // 修复内容类型问题：媒体类型和字符集分开处理
-    //    var json = JsonSerializer.Serialize(requestData);
-    //    var content = new StringContent(json, Encoding.UTF8, "text/plain");
-
-    //    // 添加字符集参数到内容类型
-    //    content.Headers.ContentType.CharSet = "UTF-8";
-
-    //    try
-    //    {
-    //        // 发送请求
-    //        var response = await client.PostAsync(url, content);
-    //        Console.WriteLine($"状态码: {(int)response.StatusCode} ({response.StatusCode})");
-
-    //        var responseBytes = await response.Content.ReadAsByteArrayAsync();
-    //        Console.WriteLine($"响应大小: {responseBytes.Length} 字节");
-
-    //        // 尝试解析JSON
-    //        try
-    //        {
-    //            using var jsonDoc = JsonDocument.Parse(responseBytes);
-    //            var options = new JsonSerializerOptions
-    //            {
-    //                WriteIndented = true,
-    //                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    //            };
-
-    //            Console.WriteLine("\n响应内容:");
-    //            Console.WriteLine(JsonSerializer.Serialize(jsonDoc, options));
-
-    //            // 保存到文件
-    //            await File.WriteAllBytesAsync("zlibrary_response.json", responseBytes);
-    //            Console.WriteLine("\n响应已保存到 zlibrary_response.json 文件");
-    //        }
-    //        catch (JsonException)
-    //        {
-    //            Console.WriteLine("响应不是有效的JSON格式");
-    //            Console.WriteLine("\n响应内容预览:");
-    //            Console.WriteLine(Encoding.UTF8.GetString(responseBytes, 0, Math.Min(500, responseBytes.Length)));
-
-    //            // 保存原始响应
-    //            await File.WriteAllBytesAsync("zlibrary_response.txt", responseBytes);
-    //            Console.WriteLine("\n原始响应已保存到 zlibrary_response.txt 文件");
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Console.WriteLine($"请求失败: {ex.Message}");
-    //        Console.WriteLine(ex.StackTrace);
-    //    }
-    //}
+    
+    /// <summary>
+    /// 带有重试机制的安全读取一行输入
+    /// </summary>
+    private static string SafeReadLineWithRetry(string defaultValue = "", int maxRetries = 3)
+    {
+        int retries = 0;
+        while (retries < maxRetries)
+        {
+            try
+            {
+                // 使用字符缓冲区手动读取输入，避免直接使用ReadLine
+                StringBuilder input = new StringBuilder();
+                
+                while (true)
+                {
+                    try
+                    {
+                        // 检查是否有按键可用，避免阻塞
+                        if (!Console.KeyAvailable)
+                        {
+                            Thread.Sleep(50); // 短暂休眠，减少CPU使用
+                            continue;
+                        }
+                        
+                        // 读取按键
+                        var key = Console.ReadKey(true);
+                        
+                        // 如果是回车键，结束输入
+                        if (key.Key == ConsoleKey.Enter)
+                        {
+                            Console.WriteLine(); // 换行
+                            break;
+                        }
+                        // 如果是退格键，删除最后一个字符
+                        else if (key.Key == ConsoleKey.Backspace)
+                        {
+                            if (input.Length > 0)
+                            {
+                                input.Remove(input.Length - 1, 1);
+                                // 在控制台上模拟退格效果
+                                Console.Write("\b \b");
+                            }
+                        }
+                        // 忽略一些控制键
+                        else if (!char.IsControl(key.KeyChar))
+                        {
+                            input.Append(key.KeyChar);
+                            Console.Write(key.KeyChar); // 显示字符
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // 忽略单次IO异常，继续读取
+                        Thread.Sleep(100);
+                    }
+                }
+                
+                return input.ToString();
+            }
+            catch (IOException)
+            {
+                retries++;
+                Thread.Sleep(200 * retries); // 增加重试间隔
+                
+                if (retries >= maxRetries)
+                {
+                    Console.WriteLine("\n输入读取失败，使用默认值。");
+                    return defaultValue;
+                }
+                
+                Console.WriteLine($"\n输入读取错误，正在重试 ({retries}/{maxRetries})...");
+            }
+        }
+        
+        return defaultValue;
+    }
+    
+    /// <summary>
+    /// 安全的读取一个按键，如果发生IO异常则忽略
+    /// </summary>
+    private static void SafeReadKey()
+    {
+        try
+        {
+            Console.ReadKey(intercept: true);
+        }
+        catch (IOException)
+        {
+            // 忽略IO异常
+        }
+    }
+    
+    /// <summary>
+    /// 带有重试机制的安全读取按键
+    /// </summary>
+    private static void SafeReadKeyWithRetry(int maxRetries = 3)
+    {
+        int retries = 0;
+        while (retries < maxRetries)
+        {
+            try
+            {
+                // 等待按键可用
+                while (!Console.KeyAvailable)
+                {
+                    Thread.Sleep(50);
+                }
+                
+                Console.ReadKey(intercept: true);
+                return;
+            }
+            catch (IOException)
+            {
+                retries++;
+                Thread.Sleep(200 * retries);
+                
+                if (retries >= maxRetries)
+                {
+                    Console.WriteLine("\n按键读取失败，继续执行。");
+                    return;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 在非交互式环境中运行的测试
+    /// </summary>
+    private static async Task RunNonInteractiveTest()
+    {
+        // 使用默认搜索关键词
+        string defaultKeyword = "dotnet";
+        Console.WriteLine($"使用默认搜索关键词: {defaultKeyword}");
+        
+        try
+        {
+            // 搜索书籍
+            var books = await Tool.SearchBooks(defaultKeyword, 1);
+            
+            Console.WriteLine($"找到 {books.Count} 本书籍");
+            
+            // 显示前5本书籍
+            int displayCount = Math.Min(5, books.Count);
+            for (int i = 0; i < displayCount; i++)
+            {
+                var book = books[i];
+                Console.WriteLine($"{i + 1}. {book.Title} - {book.Author} ({book.Year}) [{book.Extension}] {book.FileSize}");
+            }
+            
+            // 如果有书籍，尝试下载第一本
+            if (books.Count > 0)
+            {
+                var selectedBook = books[0];
+                Console.WriteLine($"\n自动选择第一本书: {selectedBook.Title}");
+                
+                string downloadDir = "Downloads";
+                if (!Directory.Exists(downloadDir))
+                {
+                    Directory.CreateDirectory(downloadDir);
+                }
+                
+                Console.WriteLine($"开始下载...");
+                bool success = await Tool.DownloadBook(selectedBook, downloadDir);
+                
+                if (success)
+                {
+                    Console.WriteLine($"下载完成！文件已保存到 {downloadDir} 目录。");
+                }
+                else
+                {
+                    Console.WriteLine("下载失败。");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"自动测试过程中出错: {ex.Message}");
+        }
+    }
 }

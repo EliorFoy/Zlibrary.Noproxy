@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zlibrary.Noproxy", "Zlibrar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zlibrary.Noproxy.Test", "Zlibrary.Noproxy.Test\Zlibrary.Noproxy.Test.csproj", "{F999D0BD-A5B7-43A2-9ED5-BA843F28AD1D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeMailReceiver", "FreeMailReceiver\FreeMailReceiver.csproj", "{1FDF4100-27F2-40EB-8C19-EB5A075A0E0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zlibrary.AccountPool", "Zlibrary.AccountPool\Zlibrary.AccountPool.csproj", "{2EBDB4E4-5D7E-4B40-91FF-346608A96CFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{F999D0BD-A5B7-43A2-9ED5-BA843F28AD1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F999D0BD-A5B7-43A2-9ED5-BA843F28AD1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F999D0BD-A5B7-43A2-9ED5-BA843F28AD1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FDF4100-27F2-40EB-8C19-EB5A075A0E0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FDF4100-27F2-40EB-8C19-EB5A075A0E0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FDF4100-27F2-40EB-8C19-EB5A075A0E0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FDF4100-27F2-40EB-8C19-EB5A075A0E0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EBDB4E4-5D7E-4B40-91FF-346608A96CFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EBDB4E4-5D7E-4B40-91FF-346608A96CFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EBDB4E4-5D7E-4B40-91FF-346608A96CFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EBDB4E4-5D7E-4B40-91FF-346608A96CFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

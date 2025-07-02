@@ -752,7 +752,8 @@ namespace Zlibrary.Noproxy
                             
                             // 构建进度条
                             int progressChars = (int)(percentage * progressBarWidth);
-                            string progressBar = new string('█', progressChars) + new string('░', progressBarWidth - progressChars);
+                            var (filledChar, emptyChar) = GetProgressBarChars();
+                            string progressBar = new string(filledChar, progressChars) + new string(emptyChar, progressBarWidth - progressChars);
                             
                             // 清除当前行并显示进度
                             Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r");
@@ -818,22 +819,90 @@ namespace Zlibrary.Noproxy
             }
         }
 
-        public static async Task<string> Test(){
-            var url = "https://z-library.sk/s/maui?page=1";
-            var html = await Get(url);
-            
-            // 解析书籍信息
-            var books = ParseBooksFromHtml(html);
+        public static async Task<string> Test(string keyword, int page = 1){
+            // 使用SearchBooks函数搜索书籍
+            var books = await SearchBooks(keyword, page);
             Console.WriteLine($"找到 {books.Count} 本书籍");
             
-            // 打印前3本书的详细信息
-            for (int i = 0; i < Math.Min(3, books.Count); i++)
+            // 打印所有书籍的详细信息
+            for (int i = 0; i < books.Count; i++)
             {
                 Console.WriteLine($"\n===== 书籍 {i+1} =====");
                 Console.WriteLine(books[i].ToString());
             }
-            await DownloadBook(books[0], "Downloads");
+            
             return JsonSerializer.Serialize(books, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        /// <summary>
+        /// 进度条样式
+        /// </summary>
+        public enum ProgressBarStyle
+        {
+            /// <summary>
+            /// 方块样式 (█░)
+            /// </summary>
+            Block,
+            
+            /// <summary>
+            /// 简单样式 (#-)
+            /// </summary>
+            Simple,
+            
+            /// <summary>
+            /// 等号样式 (=.)
+            /// </summary>
+            Equals,
+            
+            /// <summary>
+            /// 箭头样式 (>.)
+            /// </summary>
+            Arrow,
+            
+            /// <summary>
+            /// 方块样式2 (■□)
+            /// </summary>
+            Block2,
+            
+            /// <summary>
+            /// 方块样式3 (▓░)
+            /// </summary>
+            Block3,
+            
+            /// <summary>
+            /// 星号样式 (*.)
+            /// </summary>
+            Star
+        }
+        
+        // 当前进度条样式
+        private static ProgressBarStyle _progressBarStyle = ProgressBarStyle.Block;
+        
+        /// <summary>
+        /// 设置进度条样式
+        /// </summary>
+        /// <param name="style">进度条样式</param>
+        public static void SetProgressBarStyle(ProgressBarStyle style)
+        {
+            _progressBarStyle = style;
+        }
+        
+        /// <summary>
+        /// 获取进度条字符
+        /// </summary>
+        private static (char Filled, char Empty) GetProgressBarChars()
+        {
+            return _progressBarStyle switch
+            {
+                ProgressBarStyle.Block => ('█', '░'),
+                ProgressBarStyle.Simple => ('#', '-'),
+                ProgressBarStyle.Equals => ('=', '.'),
+                ProgressBarStyle.Arrow => ('>', '.'),
+                ProgressBarStyle.Block2 => ('■', '□'),
+                ProgressBarStyle.Block3 => ('▓', '░'),
+                ProgressBarStyle.Star => ('*', '.'),
+                _ => ('=', '.')
+            };
         }
     }
 }
