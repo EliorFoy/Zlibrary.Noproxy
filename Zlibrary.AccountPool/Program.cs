@@ -486,7 +486,7 @@ namespace Zlibrary.AccountPool
                         { "email", email },
                         { "password", password },
                         { "name", name },
-                        { "rx", "215" },
+                        { "rx", "114" },
                         { "action", "registration" },
                         { "redirectUrl", "" },
                         { "verifyCode", verificationCode },

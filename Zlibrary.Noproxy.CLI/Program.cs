@@ -178,74 +178,86 @@ class Program
     /// <summary>
     /// 带有重试机制的安全读取一行输入
     /// </summary>
-    private static string SafeReadLineWithRetry(string defaultValue = "", int maxRetries = 3)
+    private static string SafeReadLineWithRetry(int maxRetries = 3, string defaultValue = null)
     {
         int retries = 0;
-        while (retries < maxRetries)
+        var inputBuilder = new System.Text.StringBuilder();
+        
+        while (retries <= maxRetries)
         {
             try
             {
-                // 使用字符缓冲区手动读取输入，避免直接使用ReadLine
-                StringBuilder input = new StringBuilder();
+                inputBuilder.Clear();
+                ConsoleKeyInfo key;
                 
-                while (true)
+                do
                 {
-                    try
+                    key = Console.ReadKey(intercept: true);
+                    
+                    if (key.Key == ConsoleKey.Enter)
                     {
-                        // 检查是否有按键可用，避免阻塞
-                        if (!Console.KeyAvailable)
+                        Console.WriteLine();
+                        break;
+                    }
+                    else if (key.Key == ConsoleKey.Backspace)
+                    {
+                        if (inputBuilder.Length > 0)
                         {
-                            Thread.Sleep(50); // 短暂休眠，减少CPU使用
-                            continue;
-                        }
-                        
-                        // 读取按键
-                        var key = Console.ReadKey(true);
-                        
-                        // 如果是回车键，结束输入
-                        if (key.Key == ConsoleKey.Enter)
-                        {
-                            Console.WriteLine(); // 换行
-                            break;
-                        }
-                        // 如果是退格键，删除最后一个字符
-                        else if (key.Key == ConsoleKey.Backspace)
-                        {
-                            if (input.Length > 0)
+                            // 获取最后一个字符的宽度
+                            var lastChar = inputBuilder[inputBuilder.Length - 1].ToString();
+                            int charWidth = Console.OutputEncoding.GetByteCount(lastChar) > 1 ? 2 : 1;
+
+                            // 删除缓冲区字符
+                            inputBuilder.Remove(inputBuilder.Length - 1, 1);
+
+                            // 退格并清除字符
+                            Console.Write("\b");
+                            if (charWidth == 2)
                             {
-                                input.Remove(input.Length - 1, 1);
-                                // 在控制台上模拟退格效果
-                                Console.Write("\b \b");
+                                Console.Write("\b"); // 中文额外退格一次
+                            }
+                            Console.Write(" ");
+                            if (charWidth == 2)
+                            {
+                                Console.Write(" "); // 清除中文的第二个字符位置
+                            }
+                            // 重新定位光标
+                            for (int i = 0; i < charWidth; i++)
+                            {
+                                Console.Write("\b");
                             }
                         }
-                        // 忽略一些控制键
-                        else if (!char.IsControl(key.KeyChar))
-                        {
-                            input.Append(key.KeyChar);
-                            Console.Write(key.KeyChar); // 显示字符
-                        }
                     }
-                    catch (IOException)
+                    else if (!char.IsControl(key.KeyChar))
                     {
-                        // 忽略单次IO异常，继续读取
-                        Thread.Sleep(100);
+                        inputBuilder.Append(key.KeyChar);
+                        Console.Write(key.KeyChar);
                     }
+                } while (key.Key != ConsoleKey.Enter);
+
+                string input = inputBuilder.ToString().Trim();
+                if (!string.IsNullOrEmpty(input))
+                {
+                    return input;
                 }
                 
-                return input.ToString();
-            }
-            catch (IOException)
-            {
                 retries++;
-                Thread.Sleep(200 * retries); // 增加重试间隔
-                
-                if (retries >= maxRetries)
+                if (retries > maxRetries)
                 {
-                    Console.WriteLine("\n输入读取失败，使用默认值。");
                     return defaultValue;
                 }
                 
-                Console.WriteLine($"\n输入读取错误，正在重试 ({retries}/{maxRetries})...");
+                Console.WriteLine("输入不能为空，请重试...");
+            }
+            catch (Exception ex)
+            {
+                retries++;
+                if (retries > maxRetries)
+                {
+                    Console.WriteLine($"读取输入失败: {ex.Message}");
+                    return defaultValue;
+                }
+                Console.WriteLine($"输入错误: {ex.Message}, 请重试...");
             }
         }
         

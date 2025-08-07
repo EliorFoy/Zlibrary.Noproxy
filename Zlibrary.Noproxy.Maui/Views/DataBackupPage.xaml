@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Zlibrary.Noproxy.Maui.Views.DataBackupPage"
+             Title="Data Backup"
+             BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#1E1E1E}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <!-- Header Section -->
+            <Frame Style="{StaticResource BackupCardStyle}">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="DataBackup" 
+                           FontSize="28" 
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                           HorizontalOptions="Center" />
+                    
+                    <Label Text="Last backed-up yesterday&#10;18:30 05-Nov-2024&#10;1.4 GB used in internal storage"
+                           Style="{StaticResource StorageInfoStyle}"
+                           HorizontalTextAlignment="Center" />
+                    
+                    <!-- Happy Face Icon -->
+                    <Ellipse Fill="{AppThemeBinding Light=#4CAF50, Dark=#66BB6A}" 
+                             WidthRequest="60" 
+                             HeightRequest="60"
+                             HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Storage Usage Section -->
+            <Frame Style="{StaticResource BackupCardStyle}">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Internal storage" 
+                           FontSize="18" 
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                    
+                    <Label Text="Default backup location" 
+                           Style="{StaticResource StorageInfoStyle}" />
+                    
+                    <!-- Progress Circle Placeholder -->
+                    <Grid HorizontalOptions="Center" VerticalOptions="Center">
+                        <Ellipse Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#424242}" 
+                                 StrokeThickness="8"
+                                 WidthRequest="120" 
+                                 HeightRequest="120"
+                                 Fill="Transparent" />
+                        <Ellipse Stroke="{AppThemeBinding Light=#2196F3, Dark=#42A5F5}" 
+                                 StrokeThickness="8"
+                                 WidthRequest="120" 
+                                 HeightRequest="120"
+                                 Fill="Transparent" />
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="28%" 
+                                   FontSize="24" 
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="52 GB" 
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    
+                    <!-- Storage Legend -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                        <HorizontalStackLayout Spacing="5">
+                            <BoxView Color="#FF9800" WidthRequest="15" HeightRequest="15" CornerRadius="7.5" />
+                            <Label Text="Other" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5">
+                            <BoxView Color="#4CAF50" WidthRequest="15" HeightRequest="15" CornerRadius="7.5" />
+                            <Label Text="Backups" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5">
+                            <BoxView Color="#E0E0E0" WidthRequest="15" HeightRequest="15" CornerRadius="7.5" />
+                            <Label Text="Free" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        </HorizontalStackLayout>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Action Buttons Grid -->
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                
+                <!-- Backup files & apps -->
+                <Frame Grid.Column="0" Grid.Row="0" Style="{StaticResource BackupCardStyle}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="💾"
+                               FontSize="32"
+                               HorizontalOptions="Center" />
+                        <Label Text="Backup files &amp; apps"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Backup"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnBackupTapped" />
+                    </Frame.GestureRecognizers>
+                </Frame>
+
+                <!-- Restore your data -->
+                <Frame Grid.Column="1" Grid.Row="0" Style="{StaticResource BackupCardStyle}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="📥"
+                               FontSize="32"
+                               HorizontalOptions="Center" />
+                        <Label Text="Restore your data"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Restore"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnRestoreTapped" />
+                    </Frame.GestureRecognizers>
+                </Frame>
+
+                <!-- See your previous backups -->
+                <Frame Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource BackupCardStyle}">
+                    <HorizontalStackLayout Spacing="15">
+                        <Label Text="🕒"
+                               FontSize="32" />
+                        <VerticalStackLayout>
+                            <Label Text="See your previous backups"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                            <Label Text="History"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnHistoryTapped" />
+                    </Frame.GestureRecognizers>
+                </Frame>
+
+                <!-- Set-up cloud storage -->
+                <Frame Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource BackupCardStyle}">
+                    <HorizontalStackLayout Spacing="15">
+                        <Label Text="☁️"
+                               FontSize="32" />
+                        <VerticalStackLayout>
+                            <Label Text="Set-up cloud storage"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                            <Label Text="Cloud"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCloudTapped" />
+                    </Frame.GestureRecognizers>
+                </Frame>
+
+                <!-- Configure automatic backups -->
+                <Frame Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource BackupCardStyle}">
+                    <HorizontalStackLayout Spacing="15">
+                        <Label Text="⏰"
+                               FontSize="32" />
+                        <VerticalStackLayout>
+                            <Label Text="Configure automatic backups"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                            <Label Text="Schedule"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnScheduleTapped" />
+                    </Frame.GestureRecognizers>
+                </Frame>
+            </Grid>
+
+            <!-- Settings Button -->
+            <Button Text="⚙️ Settings" 
+                    Style="{StaticResource BackupButtonStyle}"
+                    Clicked="OnSettingsTapped" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

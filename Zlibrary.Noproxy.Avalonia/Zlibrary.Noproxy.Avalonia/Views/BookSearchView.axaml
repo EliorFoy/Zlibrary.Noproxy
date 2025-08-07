@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="clr-namespace:Zlibrary.Noproxy.Avalonia.ViewModels"
+             x:Class="Zlibrary.Noproxy.Avalonia.Views.BookSearchView"
+             x:DataType="vm:BookSearchViewModel">
+    <UserControl.DataContext>
+        <vm:BookSearchViewModel />
+    </UserControl.DataContext>
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <!-- 搜索区域 -->
+        <Border Grid.Row="0" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Z-Library 图书搜索" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBox Name="SearchBox" Text="{Binding SearchKeyword}" 
+                             Watermark="请输入搜索关键词" 
+                             MinWidth="300" 
+                             Margin="0,0,10,0"
+                             KeyDown="SearchBox_KeyDown" />
+                    <Button Content="搜索" 
+                            Command="{Binding SearchBooksCommand}" 
+                            IsEnabled="{Binding !IsSearching}"
+                            MinWidth="80" />
+                </StackPanel>
+                <TextBlock Text="{Binding SearchMessage}" 
+                           Foreground="{Binding IsSearching, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Red'}" />
+            </StackPanel>
+        </Border>
+        
+        <!-- 搜索结果区域 -->
+        <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="刷新" 
+                            Command="{Binding RefreshSearchCommand}" 
+                            Margin="0,0,10,0"
+                            IsEnabled="{Binding !IsSearching}" />
+                    <Button Content="上一页" 
+                            Command="{Binding PreviousPageCommand}" 
+                            Margin="0,0,10,0"
+                            IsEnabled="{Binding HasPreviousPage}" />
+                    <TextBlock Text="{Binding CurrentPage}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <Button Content="下一页" 
+                            Command="{Binding NextPageCommand}" 
+                            IsEnabled="{Binding HasNextPage}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        
+        <!-- 书籍列表 -->
+        <ListBox Grid.Row="2" 
+                 ItemsSource="{Binding SearchResults}" 
+                 SelectedItem="{Binding SelectedBook}"
+                 Margin="0,0,0,10">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Vertical">
+                                <TextBlock Text="{Binding Title}" FontWeight="Bold" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Author}" Foreground="Gray" Margin="0,0,10,0" />
+                                    <TextBlock Text="{Binding Year}" Foreground="Gray" Margin="0,0,10,0" />
+                                    <TextBlock Text="{Binding Extension}" Foreground="Gray" Margin="0,0,10,0" />
+                                    <TextBlock Text="{Binding FileSize}" Foreground="Gray" />
+                                </StackPanel>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="下载" 
+                                    Click="DownloadBook_Click"
+                                    Tag="{Binding}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        <!-- 底部信息 -->
+        <TextBlock Grid.Row="3" 
+                   Text="提示：点击书籍列表中的“下载”按钮开始下载书籍" 
+                   Foreground="Gray" 
+                   FontStyle="Italic" />
+    </Grid>
+</UserControl>

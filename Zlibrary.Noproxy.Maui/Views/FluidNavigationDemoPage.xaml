@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Zlibrary.Noproxy.Maui.Controls"
+             x:Class="Zlibrary.Noproxy.Maui.Views.FluidNavigationDemoPage"
+             Title="Fluid Navigation Demo"
+             BackgroundColor="#2D3436"
+             NavigationPage.HasNavigationBar="False">
+
+    <Grid>
+        <!-- Main Content Area -->
+        <ScrollView x:Name="ContentScrollView">
+            <StackLayout x:Name="ContentContainer" Padding="40" Spacing="40">
+
+                <!-- Home Content -->
+                <StackLayout x:Name="HomeContent" IsVisible="False">
+                    <Label Text="Home"
+                           FontSize="32"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="White" />
+
+                    <Label Text="Welcome to the home screen"
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           TextColor="#B2BEC3"
+                           Margin="0,20,0,0" />
+                </StackLayout>
+
+                <!-- Search Content (Default Selected) -->
+                <StackLayout x:Name="SearchContent" IsVisible="True">
+                    <Label Text="Search"
+                           FontSize="32"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="White" />
+
+                    <Label Text="Find what you're looking for"
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           TextColor="#B2BEC3"
+                           Margin="0,20,0,0" />
+
+                    <Button Text="Experience Fluid Animation"
+                            BackgroundColor="#6C5CE7"
+                            TextColor="White"
+                            CornerRadius="25"
+                            HeightRequest="50"
+                            Margin="0,40,0,0"
+                            Clicked="OnTestAnimationClicked" />
+                </StackLayout>
+
+                <!-- Heart Content -->
+                <StackLayout x:Name="HeartContent" IsVisible="False">
+                    <Label Text="Favorites"
+                           FontSize="32"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="White" />
+
+                    <Label Text="Your favorite items"
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           TextColor="#B2BEC3"
+                           Margin="0,20,0,0" />
+                </StackLayout>
+
+                <!-- Profile Content -->
+                <StackLayout x:Name="ProfileContent" IsVisible="False">
+                    <Label Text="Profile"
+                           FontSize="32"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="White" />
+
+                    <Label Text="Manage your account"
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           TextColor="#B2BEC3"
+                           Margin="0,20,0,0" />
+                </StackLayout>
+
+            </StackLayout>
+        </ScrollView>
+
+        <!-- Fluid Bottom Navigation -->
+        <controls:FluidBottomNavigation x:Name="FluidNav"
+                                        VerticalOptions="End"
+                                        TabSelected="OnTabSelected" />
+    </Grid>
+
+</ContentPage>

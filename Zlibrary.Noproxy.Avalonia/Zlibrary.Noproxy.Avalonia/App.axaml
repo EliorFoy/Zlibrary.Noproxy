@@ -1,0 +1,13 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:Zlibrary.Noproxy.Avalonia.Converters"
+             xmlns:sukiUi="clr-namespace:SukiUI;assembly=SukiUI"
+			 x:Class="Zlibrary.Noproxy.Avalonia.App">
+    <Application.Resources>
+        <converters:BoolToBrushConverter x:Key="BoolToBrushConverter" />
+        <converters:IsNotNullOrEmptyToDouble x:Key="IsNotNullOrEmptyToDouble" />
+    </Application.Resources>
+     <Application.Styles>
+        <sukiUi:SukiTheme ThemeColor="Orange"  /> 
+    </Application.Styles>
+</Application>

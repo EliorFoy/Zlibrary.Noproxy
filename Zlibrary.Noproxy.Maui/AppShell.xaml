@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Zlibrary.Noproxy.Maui.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Zlibrary.Noproxy.Maui"
+    xmlns:views="clr-namespace:Zlibrary.Noproxy.Maui.Views"
+    Title="Zlibrary.Noproxy.Maui">
+
+    <!-- 底部导航栏 -->
+    <TabBar>
+        <!-- 首页标签 -->
+        <Tab Title="首页" Icon="home.png">
+            <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" />
+        </Tab>
+
+        <!-- 第二个标签页 -->
+        <Tab Title="发现" Icon="dotnet_bot.png">
+            <ShellContent ContentTemplate="{DataTemplate views:DiscoverPage}" Route="DiscoverPage" />
+        </Tab>
+
+        <!-- 数据备份标签页 -->
+        <Tab Title="备份" Icon="dotnet_bot.png">
+            <ShellContent ContentTemplate="{DataTemplate views:DataBackupPage}" Route="DataBackupPage" />
+        </Tab>
+
+        <!-- 流体导航演示 -->
+        <Tab Title="流体导航" Icon="dotnet_bot.png">
+            <ShellContent ContentTemplate="{DataTemplate views:FluidNavigationDemoPage}" Route="FluidNavigationDemoPage" />
+        </Tab>
+
+        <!-- 第三个标签页 -->
+        <Tab Title="我的" Icon="home.svg">
+            <ShellContent ContentTemplate="{DataTemplate views:ProfilePage}" Route="ProfilePage" />
+        </Tab>
+    </TabBar>
+
+</Shell>

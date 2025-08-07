@@ -1,0 +1,156 @@
+<sukiUi:SukiWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Zlibrary.Noproxy.Avalonia.ViewModels"
+        xmlns:materialIcons="clr-namespace:Material.Icons;assembly=Material.Icons"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:suki="https://github.com/kikipoulet/SukiUI"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sukiUi="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+        xmlns:views="clr-namespace:Zlibrary.Noproxy.Avalonia.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Zlibrary.Noproxy.Avalonia.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="EliorFoy Zlibrary下载工具"
+        IsMenuVisible="True"
+        IsTitleBarVisible="{Binding IsTitleBarVisible}"
+        CanMinimize="{Binding !WindowLocked}"
+        CanMove="{Binding !WindowLocked}"
+        CanResize="{Binding !WindowLocked}">
+    <sukiUi:SukiWindow.MenuItems>
+        <MenuItem Header="Toggles">
+            <MenuItem Header="Lightbulb">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Lightbulb}" />
+                </MenuItem.Icon>
+            </MenuItem>
+
+            <MenuItem Command="{Binding ToggleTitleBarCommand}"
+                      Header="Title Bar"
+                      ToolTip.Tip="Toggles the title bar.">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.FormatTitle}" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Visibility">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Visibility}" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem
+                      Header="Right To Left"
+                      ToolTip.Tip="Toggles the right to left.">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.SwapHorizontal}" />
+                </MenuItem.Icon>
+            </MenuItem>
+
+
+
+            <MenuItem Header="Window Options">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.WindowRestore}" />
+                </MenuItem.Icon>
+                <MenuItem Command="{Binding ToggleWindowLockCommand}"
+                          Header="Window Lock"
+                          ToolTip.Tip="Toggles minimizing and resizing.">
+                    <MenuItem.Icon>
+                        <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Lock}" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem
+                          Header="Fullscreen"
+                          ToolTip.Tip="Makes the app fullscreen.">
+                    <MenuItem.Icon>
+                        <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Fullscreen}" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="CanFullscreen"
+                          IsChecked="{Binding $parent[sukiUi:SukiWindow].CanFullScreen, Mode=TwoWay}"
+                          ToggleType="CheckBox" />
+
+                <MenuItem Header="CanPin"
+                          IsChecked="{Binding $parent[sukiUi:SukiWindow].CanPin, Mode=TwoWay}"
+                          ToggleType="CheckBox" />
+
+                <MenuItem Header="CanMinimize"
+                          IsChecked="{Binding $parent[sukiUi:SukiWindow].CanMinimize, Mode=TwoWay}"
+                          ToggleType="CheckBox" />
+
+                <MenuItem Header="CanMaximize"
+                          IsChecked="{Binding $parent[sukiUi:SukiWindow].CanMaximize, Mode=TwoWay}"
+                          ToggleType="CheckBox" />
+
+                <MenuItem Header="CanMove"
+                          IsChecked="{Binding $parent[sukiUi:SukiWindow].CanMove, Mode=TwoWay}"
+                          ToggleType="CheckBox" />
+
+                <MenuItem Header="CanResize"
+                          IsChecked="{Binding $parent[sukiUi:SukiWindow].CanResize, Mode=TwoWay}"
+                          ToggleType="CheckBox" />
+            </MenuItem>
+
+
+
+        </MenuItem>
+        <MenuItem Header="Theme">
+            <MenuItem Click="ThemeMenuItem_OnClick"
+                      Header="Switch To..."
+                     >
+                <MenuItem.DataTemplates>
+                    <DataTemplate DataType="{x:Type suki:SukiColorTheme}">
+                        <TextBlock Text="{Binding}" />
+                    </DataTemplate>
+                </MenuItem.DataTemplates>
+            </MenuItem>
+            <MenuItem Header="-" />
+            <MenuItem Header="Create Custom" />
+            <MenuItem Header="-" />
+            <MenuItem Header="Shadcn Mode" />
+        </MenuItem>
+        <MenuItem Header="Background">
+            <MenuItem Click="BackgroundMenuItem_OnClick"
+                      Header="Switch To..."
+                     />
+            <MenuItem Header="-" />
+            <MenuItem Command="{Binding ToggleAnimationsCommand}" Header="Animations">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Animation}" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Command="{Binding ToggleTransitionsCommand}" Header="Transitions">
+                <MenuItem.Icon>
+                    <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Transition}" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </MenuItem>
+    </sukiUi:SukiWindow.MenuItems>
+    <sukiUi:SukiSideMenu x:Name="SideMenu">
+        <suki:SukiSideMenuItem Classes="Compact" Header="图书搜索">
+            <suki:SukiSideMenuItem.Icon>
+                <avalonia:MaterialIcon Kind="BookSearch" />
+            </suki:SukiSideMenuItem.Icon>
+            <suki:SukiSideMenuItem.PageContent>
+                <views:BookSearchView x:Name="BookSearchView" />
+            </suki:SukiSideMenuItem.PageContent>
+        </suki:SukiSideMenuItem>
+        <suki:SukiSideMenuItem Classes="Compact" Header="下载" x:Name="DownloadMenuItem">
+            <suki:SukiSideMenuItem.Icon>
+                <avalonia:MaterialIcon Kind="Download" />
+            </suki:SukiSideMenuItem.Icon>
+            <suki:SukiSideMenuItem.PageContent>
+                <views:BookDownloadView x:Name="BookDownloadView" />
+            </suki:SukiSideMenuItem.PageContent>
+        </suki:SukiSideMenuItem>
+        <suki:SukiSideMenuItem Classes="Compact" Header="日志">
+            <suki:SukiSideMenuItem.Icon>
+                <avalonia:MaterialIcon Kind="FileDocument" />
+            </suki:SukiSideMenuItem.Icon>
+            <suki:SukiSideMenuItem.PageContent>
+                <views:LogView />
+            </suki:SukiSideMenuItem.PageContent>
+        </suki:SukiSideMenuItem>
+    </sukiUi:SukiSideMenu> 
+</sukiUi:SukiWindow>
