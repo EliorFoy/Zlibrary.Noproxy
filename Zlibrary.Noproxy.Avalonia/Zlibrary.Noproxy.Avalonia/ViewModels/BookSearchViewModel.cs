@@ -38,6 +38,9 @@ namespace Zlibrary.Noproxy.Avalonia.ViewModels
         
         [ObservableProperty]
         private bool _hasPreviousPage = false;
+        
+        public string CurrentPageDisplay => $"第 {CurrentPage} 页";
+        
         public BookSearchViewModel(DownloadManager downloadManager, MainViewModel? mainViewModel = null)
         {
             _downloadManager = downloadManager;
