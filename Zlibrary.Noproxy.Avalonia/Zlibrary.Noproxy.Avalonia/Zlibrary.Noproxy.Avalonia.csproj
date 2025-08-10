@@ -22,7 +22,11 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Material.Icons.Avalonia" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Maui.Essentials" />
     <PackageReference Include="SukiUI" />
+    <!-- 添加对MAUI Essentials的引用，用于Android平台的文件操作 -->
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.40" Condition="'$(TargetFramework)' == 'net8.0-android'" />
   </ItemGroup>
 
   <ItemGroup>

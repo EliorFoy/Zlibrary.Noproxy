@@ -31,17 +31,24 @@ public partial class BookSearchView : UserControl
     {
         if (sender is Button button && button.Tag is BookInfo book)
         {
-            // 查找父级控件中的MainWindow
+            // 查找父级控件中的MainViewModel
+            var mainView = this.FindAncestorOfType<MainView>();
             var mainWindow = this.FindAncestorOfType<MainWindow>();
-            if (mainWindow != null)
+            
+            MainViewModel? mainViewModel = null;
+            if (mainView?.DataContext is MainViewModel mv)
             {
-                var bookDownloadViewModel = mainWindow.GetBookDownloadViewModel();
-                if (bookDownloadViewModel != null)
-                {
-                    bookDownloadViewModel.SetSelectedBook(book);
-                    // 切换到下载页面
-                    mainWindow.SwitchToDownloadPage();
-                }
+                mainViewModel = mv;
+            }
+            else if (mainWindow?.DataContext is MainViewModel mw)
+            {
+                mainViewModel = mw;
+            }
+            
+            // 通过BookSearchViewModel处理下载，而不是直接调用BookDownloadViewModel的SetSelectedBook方法
+            if (DataContext is BookSearchViewModel searchViewModel)
+            {
+                searchViewModel.DownloadBookCommand.Execute(book);
             }
         }
     }

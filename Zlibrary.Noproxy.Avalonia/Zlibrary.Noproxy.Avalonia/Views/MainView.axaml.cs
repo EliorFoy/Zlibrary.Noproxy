@@ -1,4 +1,8 @@
 using Avalonia.Controls;
+using Zlibrary.Noproxy.Avalonia.ViewModels;
+using System.Linq;
+using Avalonia.VisualTree;
+using Avalonia.Controls.Primitives;
 
 namespace Zlibrary.Noproxy.Avalonia.Views
 {
@@ -8,5 +12,6 @@ namespace Zlibrary.Noproxy.Avalonia.Views
         {
             InitializeComponent();
         }
+
     }
 }

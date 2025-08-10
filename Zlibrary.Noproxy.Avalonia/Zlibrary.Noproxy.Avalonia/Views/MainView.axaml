@@ -4,6 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Zlibrary.Noproxy.Avalonia.ViewModels"
              xmlns:converters="clr-namespace:Zlibrary.Noproxy.Avalonia.Converters"
+             xmlns:views="clr-namespace:Zlibrary.Noproxy.Avalonia.Views"
+             xmlns:materialIcons="clr-namespace:Material.Icons;assembly=Material.Icons"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
 
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Zlibrary.Noproxy.Avalonia.Views.MainView"
@@ -22,20 +25,9 @@
       <RowDefinition Height="60"/>
     </Grid.RowDefinitions>
 
-    <!-- 主内容区域 -->
-    <ContentControl Grid.Row="0" Content="{Binding CurrentPage}">
-      <ContentControl.ContentTemplate>
-        <DataTemplate>
-          <Grid>
-            <TextBlock Text="{Binding}" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"
-                       FontSize="24"
-                       Foreground="{DynamicResource SystemAccentColor}"/>
-          </Grid>
-        </DataTemplate>
-      </ContentControl.ContentTemplate>
-    </ContentControl>
+    <!-- 内容显示区域 -->
+    <ContentControl Grid.Row="0" 
+                    Content="{Binding SelectedViewModel}"/>
 
     <!-- 底部导航栏 -->
     <Border Grid.Row="1" 
@@ -48,97 +40,59 @@
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- 聊天 -->
+        <!-- 图书搜索 -->
         <Button Grid.Column="0"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Chat"
                 Background="Transparent"
                 BorderThickness="0">
           <StackPanel Orientation="Vertical" Spacing="4">
-            <Path Width="24" Height="24"
+            <avalonia:MaterialIcon Width="24" Height="24"
                   HorizontalAlignment="Center"
-                  Fill="{Binding IsChatSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
-                  Data="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6V9M14,14H6V12H14V14M18,8H6V6H18V8Z" />
-            <TextBlock Text="聊天"
+                  Foreground="{Binding IsChatSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
+                  Kind="{x:Static materialIcons:MaterialIconKind.BookSearch}" />
+            <TextBlock Text="搜索"
                        FontSize="12"
                        HorizontalAlignment="Center"
                        Foreground="{Binding IsChatSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"/>
           </StackPanel>
         </Button>
 
-        <!-- 联系人 -->
+        <!-- 下载 -->
         <Button Grid.Column="1"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Contacts"
                 Background="Transparent"
                 BorderThickness="0">
           <StackPanel Orientation="Vertical" Spacing="4">
-            <Path Width="24" Height="24"
+            <avalonia:MaterialIcon Width="24" Height="24"
                   HorizontalAlignment="Center"
-                  Fill="{Binding IsContactsSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
-                  Data="M16,4C16.88,4 17.67,4.38 18.18,5C18.69,4.38 19.48,4 20.36,4C21.8,4 23,5.2 23,6.64C23,8.08 21.8,9.28 20.36,9.28C19.48,9.28 18.69,8.9 18.18,8.28C17.67,8.9 16.88,9.28 16,9.28C14.56,9.28 13.36,8.08 13.36,6.64C13.36,5.2 14.56,4 16,4M12.5,11H23.5L22.5,16H23.5V18H12.5V16H13.5L12.5,11M6,4A2,2 0 0,1 8,6A2,2 0 0,1 6,8A2,2 0 0,1 4,6A2,2 0 0,1 6,4M6,9C7.11,9 8,9.89 8,11V22H4V11C4,9.89 4.89,9 6,9Z" />
-            <TextBlock Text="联系人"
+                  Foreground="{Binding IsContactsSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
+                  Kind="{x:Static materialIcons:MaterialIconKind.Download}" />
+            <TextBlock Text="下载"
                        FontSize="12"
                        HorizontalAlignment="Center"
                        Foreground="{Binding IsContactsSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"/>
           </StackPanel>
         </Button>
 
-        <!-- 发现 -->
+        <!-- 日志 -->
         <Button Grid.Column="2"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Discover"
                 Background="Transparent"
                 BorderThickness="0">
           <StackPanel Orientation="Vertical" Spacing="4">
-            <Path Width="24" Height="24"
+            <avalonia:MaterialIcon Width="24" Height="24"
                   HorizontalAlignment="Center"
-                  Fill="{Binding IsDiscoverSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
-                  Data="M7,17L10.2,10.2L17,7L13.8,13.8L7,17M12,11.1A0.9,0.9 0 0,0 11.1,12A0.9,0.9 0 0,0 12,12.9A0.9,0.9 0 0,0 12.9,12A0.9,0.9 0 0,0 12,11.1M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z" />
-            <TextBlock Text="发现"
+                  Foreground="{Binding IsDiscoverSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
+                  Kind="{x:Static materialIcons:MaterialIconKind.FileDocument}" />
+            <TextBlock Text="日志"
                        FontSize="12"
                        HorizontalAlignment="Center"
                        Foreground="{Binding IsDiscoverSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"/>
-          </StackPanel>
-        </Button>
-
-        <!-- 朋友圈 -->
-        <Button Grid.Column="3"
-                Command="{Binding NavigateCommand}"
-                CommandParameter="Moments"
-                Background="Transparent"
-                BorderThickness="0">
-          <StackPanel Orientation="Vertical" Spacing="4">
-            <Path Width="24" Height="24"
-                  HorizontalAlignment="Center"
-                  Fill="{Binding IsMomentsSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
-                  Data="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
-            <TextBlock Text="朋友圈"
-                       FontSize="12"
-                       HorizontalAlignment="Center"
-                       Foreground="{Binding IsMomentsSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"/>
-          </StackPanel>
-        </Button>
-
-        <!-- 我的 -->
-        <Button Grid.Column="4"
-                Command="{Binding NavigateCommand}"
-                CommandParameter="Profile"
-                Background="Transparent"
-                BorderThickness="0">
-          <StackPanel Orientation="Vertical" Spacing="4">
-            <Path Width="24" Height="24"
-                  HorizontalAlignment="Center"
-                  Fill="{Binding IsProfileSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"
-                  Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-            <TextBlock Text="我的"
-                       FontSize="12"
-                       HorizontalAlignment="Center"
-                       Foreground="{Binding IsProfileSelected, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Gray'}"/>
           </StackPanel>
         </Button>
       </Grid>

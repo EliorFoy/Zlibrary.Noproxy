@@ -999,6 +999,72 @@ namespace Zlibrary.Noproxy
         }
         
         /// <summary>
+        /// 下载书籍并返回字节数组
+        /// </summary>
+        /// <param name="book">要下载的书籍信息</param>
+        /// <returns>书籍文件的字节数组</returns>
+        public static async Task<byte[]?> DownloadBook(BookInfo book)
+        {
+            if (book == null)
+            {
+                Console.WriteLine("书籍信息为空，无法下载");
+                return null;
+            }
+            
+            return await DownloadBook(book.DownloadUrl!);
+        }
+        
+        /// <summary>
+        /// 下载书籍并返回字节数组
+        /// </summary>
+        /// <param name="downloadUrl">下载链接</param>
+        /// <returns>书籍文件的字节数组</returns>
+        public static async Task<byte[]?> DownloadBook(string downloadUrl)
+        {
+            try
+            {
+                // 替换URL中的域名为IP地址
+                string url = downloadUrl.Replace(ORIGIN_DOMAIN, ACTUAL_IP);
+                
+                // 创建不自动重定向的HttpClient
+                using var redirectClient = CreateNewClient(allowAutoRedirect: false);
+                
+                // 发送请求获取重定向URL
+                var response = await redirectClient.GetAsync(url);
+                
+                // 检查是否为重定向
+                if (response.StatusCode == HttpStatusCode.Found || 
+                    response.StatusCode == HttpStatusCode.Redirect || 
+                    response.StatusCode == HttpStatusCode.MovedPermanently || 
+                    response.StatusCode == HttpStatusCode.TemporaryRedirect)
+                {
+                    var location = response.Headers.Location;
+                    if (location != null)
+                    {
+                        string redirectUrl = location.ToString();
+                        
+                        // 创建新的HttpClient下载文件（使用较长的超时时间）
+                        using var downloadClient = new HttpClient
+                        {
+                            Timeout = TimeSpan.FromMinutes(10) // 设置10分钟超时
+                        };
+                        
+                        // 下载并返回字节数组
+                        byte[] fileBytes = await downloadClient.GetByteArrayAsync(redirectUrl);
+                        return fileBytes;
+                    }
+                }
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"下载书籍时出错: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
         /// 格式化文件大小
         /// </summary>
         private static string FormatFileSize(long bytes)

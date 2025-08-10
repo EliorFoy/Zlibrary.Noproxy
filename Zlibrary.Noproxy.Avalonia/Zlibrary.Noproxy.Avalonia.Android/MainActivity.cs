@@ -2,6 +2,8 @@
 using Android.Content.PM;
 using Avalonia;
 using Avalonia.Android;
+using Zlibrary.Noproxy.Avalonia.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Zlibrary.Noproxy.Avalonia.Android
 {
@@ -17,6 +19,11 @@ namespace Zlibrary.Noproxy.Avalonia.Android
         {
             return base.CustomizeAppBuilder(builder)
                 .WithInterFont();
+            //                 .AfterPlatformServicesSetup(_ =>
+            // {
+            //     App.Services.AddSingleton<IFileService, FileServiceAndroid>();
+            //     App.Services.AddTransient<MainViewModel>();
+            // });
         }
     }
 }

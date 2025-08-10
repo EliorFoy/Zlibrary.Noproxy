@@ -1,6 +1,7 @@
 <sukiUi:SukiWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Zlibrary.Noproxy.Avalonia.ViewModels"
+        xmlns:material="using:Material.Icons.Avalonia"
         xmlns:materialIcons="clr-namespace:Material.Icons;assembly=Material.Icons"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:suki="https://github.com/kikipoulet/SukiUI"
@@ -130,7 +131,7 @@
     <sukiUi:SukiSideMenu x:Name="SideMenu">
         <suki:SukiSideMenuItem Classes="Compact" Header="图书搜索">
             <suki:SukiSideMenuItem.Icon>
-                <avalonia:MaterialIcon Kind="BookSearch" />
+                <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.BookSearch}" />
             </suki:SukiSideMenuItem.Icon>
             <suki:SukiSideMenuItem.PageContent>
                 <views:BookSearchView x:Name="BookSearchView" />
@@ -138,7 +139,8 @@
         </suki:SukiSideMenuItem>
         <suki:SukiSideMenuItem Classes="Compact" Header="下载" x:Name="DownloadMenuItem">
             <suki:SukiSideMenuItem.Icon>
-                <avalonia:MaterialIcon Kind="Download" />
+                <!-- <material:MaterialIcon Kind="Abacus"></material:MaterialIcon> -->
+                <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Download}" />
             </suki:SukiSideMenuItem.Icon>
             <suki:SukiSideMenuItem.PageContent>
                 <views:BookDownloadView x:Name="BookDownloadView" />
@@ -146,7 +148,7 @@
         </suki:SukiSideMenuItem>
         <suki:SukiSideMenuItem Classes="Compact" Header="日志">
             <suki:SukiSideMenuItem.Icon>
-                <avalonia:MaterialIcon Kind="FileDocument" />
+                <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.FileDocument}" />
             </suki:SukiSideMenuItem.Icon>
             <suki:SukiSideMenuItem.PageContent>
                 <views:LogView />

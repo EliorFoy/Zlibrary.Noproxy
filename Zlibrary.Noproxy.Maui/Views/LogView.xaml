@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Zlibrary.Noproxy.Maui.Views.LogView"
+             Title="操作日志">
+    <Grid Padding="10" RowDefinitions="Auto,*,Auto">
+        <Label Grid.Row="0" Text="操作日志" FontSize="18" FontAttributes="Bold" Margin="0,0,0,10" />
+        
+        <ScrollView Grid.Row="1">
+            <CollectionView ItemsSource="{Binding LogMessages}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Stroke="LightGray" StrokeThickness="0,0,0,1" Padding="5">
+                            <Label Text="{Binding}" LineBreakMode="WordWrap" />
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+        
+        <HorizontalStackLayout Grid.Row="2" Spacing="10" Margin="0,10,0,0">
+            <Button Text="清空日志" Clicked="ClearLogs_Click" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>

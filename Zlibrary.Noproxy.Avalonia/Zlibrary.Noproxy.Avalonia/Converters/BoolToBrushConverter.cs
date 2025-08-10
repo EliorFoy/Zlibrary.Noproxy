@@ -24,6 +24,11 @@ namespace Zlibrary.Noproxy.Avalonia.Converters
                         return isSelected ? Brushes.Blue : Brushes.Gray;
                     }
                     
+                    if (trueBrush.Equals("Orange", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return isSelected ? Brushes.Orange : Brushes.Gray;
+                    }
+                    
                     if (Application.Current?.Resources != null)
                     {
                         return isSelected 
@@ -41,4 +46,4 @@ namespace Zlibrary.Noproxy.Avalonia.Converters
             throw new NotImplementedException();
         }
     }
-} 
+}

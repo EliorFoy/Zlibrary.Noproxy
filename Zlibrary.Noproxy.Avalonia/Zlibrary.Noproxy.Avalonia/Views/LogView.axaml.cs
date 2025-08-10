@@ -16,7 +16,6 @@ public partial class LogView : UserControl
     {
         if (DataContext is LogViewModel logViewModel)
         {
-            logViewModel.ClearLogs();
         }
     }
 }

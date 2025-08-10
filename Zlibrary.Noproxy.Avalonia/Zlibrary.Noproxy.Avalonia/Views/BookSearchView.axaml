@@ -6,10 +6,6 @@
              xmlns:vm="clr-namespace:Zlibrary.Noproxy.Avalonia.ViewModels"
              x:Class="Zlibrary.Noproxy.Avalonia.Views.BookSearchView"
              x:DataType="vm:BookSearchViewModel">
-    <UserControl.DataContext>
-        <vm:BookSearchViewModel />
-    </UserControl.DataContext>
-    
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -34,7 +30,7 @@
                             MinWidth="80" />
                 </StackPanel>
                 <TextBlock Text="{Binding SearchMessage}" 
-                           Foreground="{Binding IsSearching, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Blue|Red'}" />
+                           Foreground="{Binding IsSearching, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Orange|Red'}" />
             </StackPanel>
         </Border>
         
@@ -81,8 +77,8 @@
                                 </StackPanel>
                             </StackPanel>
                             <Button Grid.Column="1" Content="下载" 
-                                    Click="DownloadBook_Click"
-                                    Tag="{Binding}" />
+                                    Command="{Binding $parent[UserControl].DataContext.DownloadBookCommand}"
+                                    CommandParameter="{Binding}" />
                         </Grid>
                     </Border>
                 </DataTemplate>

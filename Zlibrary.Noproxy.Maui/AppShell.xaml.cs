@@ -1,4 +1,4 @@
-﻿using Zlibrary.Noproxy.Maui.Views;
+﻿using Microsoft.Maui.Controls;
 
 namespace Zlibrary.Noproxy.Maui
 {
@@ -7,10 +7,6 @@ namespace Zlibrary.Noproxy.Maui
         public AppShell()
         {
             InitializeComponent();
-
-            // Register routes for navigation
-            Routing.RegisterRoute("DataBackupPage", typeof(DataBackupPage));
-            Routing.RegisterRoute("FluidNavigationDemoPage", typeof(FluidNavigationDemoPage));
         }
     }
 }

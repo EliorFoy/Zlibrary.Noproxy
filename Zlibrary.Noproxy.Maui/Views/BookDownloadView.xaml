@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Zlibrary.Noproxy.Maui.Views.BookDownloadView"
+             Title="书籍下载">
+    <ScrollView>
+        <VerticalStackLayout Padding="10" Spacing="10">
+            <!-- 书籍信息区域 -->
+            <Border Stroke="LightGray" StrokeThickness="1" Padding="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="书籍下载" FontSize="18" FontAttributes="Bold" />
+                    <VerticalStackLayout IsVisible="{Binding SelectedBook, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                        <Label Text="{Binding SelectedBook.Title}" FontSize="16" FontAttributes="Bold" Margin="0,0,0,5" />
+                        <HorizontalStackLayout Spacing="5" Margin="0,0,0,5">
+                            <Label Text="作者: " FontAttributes="Bold" />
+                            <Label Text="{Binding SelectedBook.Author}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5" Margin="0,0,0,5">
+                            <Label Text="年份: " FontAttributes="Bold" />
+                            <Label Text="{Binding SelectedBook.Year}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5" Margin="0,0,0,5">
+                            <Label Text="格式: " FontAttributes="Bold" />
+                            <Label Text="{Binding SelectedBook.Extension}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5" Margin="0,0,0,5">
+                            <Label Text="大小: " FontAttributes="Bold" />
+                            <Label Text="{Binding SelectedBook.FileSize}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5" Margin="0,0,0,5">
+                            <Label Text="出版社: " FontAttributes="Bold" />
+                            <Label Text="{Binding SelectedBook.Publisher}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5" Margin="0,0,0,10">
+                            <Label Text="语言: " FontAttributes="Bold" />
+                            <Label Text="{Binding SelectedBook.Language}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="下载路径: " FontAttributes="Bold" VerticalOptions="Center" />
+                            <Entry Text="{Binding DownloadPath}" 
+                                   WidthRequest="300" 
+                                   VerticalOptions="Center" />
+                            <Button Text="选择路径" IsEnabled="{Binding !IsDownloading}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                    <Label Text="请先在搜索页面选择一本书籍" 
+                           IsVisible="{Binding SelectedBook, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=inverse}"
+                           TextColor="Gray" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 下载进度区域 -->
+            <Border Stroke="LightGray" StrokeThickness="1" Padding="10">
+                <VerticalStackLayout Spacing="10">
+                    <!-- 使用MAUI的ProgressBar -->
+                    <ProgressBar Progress="{Binding DownloadProgress}" 
+                                 IsVisible="{Binding IsDownloading}" 
+                                 Margin="0,0,0,10" 
+                                 HorizontalOptions="Center"/>
+                    <Label Text="{Binding DownloadMessage}" 
+                           TextColor="{Binding IsDownloading, Converter={StaticResource BoolToColorConverter}}"
+                           Margin="0,0,0,10" 
+                           HorizontalOptions="Center"
+                           LineBreakMode="WordWrap"/>
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <Button Text="开始下载" 
+                                Command="{Binding DownloadSelectedBookCommand}" 
+                                IsEnabled="{Binding SelectedBook, Converter={StaticResource IsNotNullOrEmptyConverter}}"
+                                IsVisible="{Binding !IsDownloading}" 
+                                Margin="0,0,10,0"/>
+                        <Button Text="打开文件" 
+                                Command="{Binding OpenDownloadedFileCommand}" 
+                                IsVisible="{Binding !IsDownloading}" 
+                                Margin="0,0,10,0"/>
+                        <Button Text="打开文件所在目录" 
+                                Command="{Binding ShowFileInFolderCommand}" 
+                                IsVisible="{Binding !IsDownloading}"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 底部信息 -->
+            <Label Text="提示：点击&quot;开始下载&quot;按钮下载选中的书籍" 
+                   TextColor="Gray" 
+                   FontAttributes="Italic" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
