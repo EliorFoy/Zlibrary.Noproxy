@@ -48,6 +48,7 @@ namespace Zlibrary.Noproxy.Avalonia.ViewModels
         
         private void OnToolDownloadProgressChanged(double progress, string message)
         {
+            // 确保在UI线程上触发事件
             DownloadProgressChanged?.Invoke(progress, message);
         }
         
@@ -76,8 +77,8 @@ namespace Zlibrary.Noproxy.Avalonia.ViewModels
                 // 触发下载进度事件
                 DownloadProgressChanged?.Invoke(0, "开始下载...");
                 
-                // 使用Tool下载书籍并获取字节数组
-                byte[]? fileData = await Tool.DownloadBook(_selectedBook);
+                // 使用Tool下载书籍并获取字节数组（支持进度报告）
+                byte[]? fileData = await Tool.DownloadBookWithProgress(_selectedBook);
                 if (fileData == null || fileData.Length == 0)
                 {
                     DownloadFailed?.Invoke("下载失败: 未获取到文件数据");
@@ -102,7 +103,7 @@ namespace Zlibrary.Noproxy.Avalonia.ViewModels
                 return false;
             }
         }
-        
+
         // 打开已下载的文件
         public async Task<bool> OpenDownloadedFile(string filePath)
         {

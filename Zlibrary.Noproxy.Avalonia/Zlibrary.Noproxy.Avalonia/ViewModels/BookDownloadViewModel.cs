@@ -94,7 +94,7 @@ namespace Zlibrary.Noproxy.Avalonia.ViewModels
         }
         
         [RelayCommand]
-        private async Task DownloadSelectedBook()
+        private async Task StartDownload()
         {
             if (SelectedBook == null)
             {

@@ -788,216 +788,7 @@ namespace Zlibrary.Noproxy
         // 添加一个事件用于报告下载进度
         public static event DownloadProgressHandler? DownloadProgressChanged;
         
-        /// <summary>
-        /// 带进度报告的文件下载方法（用于GUI）
-        /// </summary>
-        /// <param name="client">HttpClient实例</param>
-        /// <param name="url">下载URL</param>
-        /// <param name="destinationPath">保存路径</param>
-        /// <returns>异步任务</returns>
-        private static async Task DownloadFileWithProgressForGUIAsync(HttpClient client, string url, string destinationPath)
-        {
-            try
-            {
-                // 发送请求获取响应
-                using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
-                
-                // 获取文件总大小
-                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-                
-                // 创建文件流
-                using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                using var contentStream = await response.Content.ReadAsStreamAsync();
-                
-                // 准备下载
-                byte[] buffer = new byte[8192]; // 8KB缓冲区
-                long totalBytesRead = 0;
-                int bytesRead;
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-                
-                // 读取数据流并写入文件
-                while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                {
-                    await fileStream.WriteAsync(buffer, 0, bytesRead);
-                    totalBytesRead += bytesRead;
-                    
-                    // 报告进度
-                    if (totalBytes > 0)
-                    {
-                        // 计算进度百分比
-                        double percentage = (double)totalBytesRead / totalBytes;
-                        string message = $"已下载: {FormatFileSize(totalBytesRead)}/{FormatFileSize(totalBytes)}";
-                        DownloadProgressChanged?.Invoke(percentage * 100, message);
-                    }
-                    else
-                    {
-                        // 如果不知道总大小，只显示已下载大小
-                        string message = $"已下载: {FormatFileSize(totalBytesRead)}";
-                        DownloadProgressChanged?.Invoke(-1, message); // -1表示未知进度
-                    }
-                }
-                
-                sw.Stop();
-                DownloadProgressChanged?.Invoke(100, "下载完成");
-            }
-            catch (Exception ex)
-            {
-                DownloadProgressChanged?.Invoke(-1, $"下载出错: {ex.Message}");
-                throw;
-            }
-        }
-        
-        /// <summary>
-        /// 下载书籍（用于GUI）
-        /// </summary>
-        /// <param name="downloadUrl">下载链接</param>
-        /// <param name="savePath">保存路径</param>
-        /// <param name="suggestedFileName">建议的文件名（可选）</param>
-        /// <param name="suggestedExtension">建议的文件扩展名（可选）</param>
-        /// <returns>是否下载成功</returns>
-        public static async Task<bool> DownloadBookForGUI(string downloadUrl, string savePath, string? suggestedFileName = null, string? suggestedExtension = null)
-        {
-            try
-            {
-                // 确保保存路径存在
-                if (!Directory.Exists(savePath))
-                {
-                    Directory.CreateDirectory(savePath);
-                }
-                
-                // 替换URL中的域名为IP地址
-                string url = downloadUrl.Replace(ORIGIN_DOMAIN, ACTUAL_IP);
-                
-                // 创建不自动重定向的HttpClient
-                using var redirectClient = CreateNewClient(allowAutoRedirect: false);
-                
-                // 发送请求获取重定向URL
-                var response = await redirectClient.GetAsync(url);
-                
-                // 检查是否为重定向
-                if (response.StatusCode == HttpStatusCode.Found || 
-                    response.StatusCode == HttpStatusCode.Redirect || 
-                    response.StatusCode == HttpStatusCode.MovedPermanently || 
-                    response.StatusCode == HttpStatusCode.TemporaryRedirect)
-                {
-                    var location = response.Headers.Location;
-                    if (location != null)
-                    {
-                        string redirectUrl = location.ToString();
-                        
-                        // 从URL查询参数中提取文件名
-                        string? fileName = null;
-                        
-                        // 尝试从URL的查询参数中获取文件名
-                        if (redirectUrl.Contains("filename="))
-                        {
-                            try
-                            {
-                                // 解析URL查询参数
-                                var uri = new Uri(redirectUrl);
-                                var queryParams = uri.Query
-                                    .TrimStart('?')
-                                    .Split('&')
-                                    .Select(p => p.Split('='))
-                                    .ToDictionary(
-                                        p => p[0], 
-                                        p => p.Length > 1 ? WebUtility.UrlDecode(p[1]) : null
-                                    );
-                                
-                                if (queryParams.ContainsKey("filename") && !string.IsNullOrEmpty(queryParams["filename"]))
-                                {
-                                    fileName = queryParams["filename"];
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                // 忽略解析错误
-                            }
-                        }
-                        
-                        // 如果URL查询参数中没有文件名，尝试从Content-Disposition头获取
-                        if (string.IsNullOrEmpty(fileName) && response.Content.Headers.ContentDisposition != null)
-                        {
-                            fileName = response.Content.Headers.ContentDisposition.FileName?.Trim('"');
-                        }
-                        
-                        // 如果仍然没有文件名，尝试从URL或建议的文件名构建
-                        if (string.IsNullOrEmpty(fileName))
-                        {
-                            if (!string.IsNullOrEmpty(suggestedFileName))
-                            {
-                                // 使用建议的文件名和扩展名
-                                fileName = suggestedFileName;
-                                if (!string.IsNullOrEmpty(suggestedExtension) && !fileName.EndsWith($".{suggestedExtension}"))
-                                {
-                                    fileName = $"{fileName}.{suggestedExtension}";
-                                }
-                            }
-                            else
-                            {
-                                // 从URL中提取文件名（不包括查询参数）
-                                var uri = new Uri(redirectUrl);
-                                fileName = Path.GetFileName(uri.AbsolutePath);
-                                
-                                // 如果URL中没有文件名，使用GUID
-                                if (string.IsNullOrEmpty(fileName) || fileName.Length < 3 || fileName.Equals("redirection", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    fileName = $"book_{Guid.NewGuid().ToString().Substring(0, 8)}";
-                                    if (!string.IsNullOrEmpty(suggestedExtension))
-                                    {
-                                        fileName = $"{fileName}.{suggestedExtension}";
-                                    }
-                                    else
-                                    {
-                                        fileName = $"{fileName}.epub"; // 默认EPUB格式
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // 构建完整的保存路径
-                        string fullPath = Path.Combine(savePath, fileName!);
-                        
-                        // 创建新的HttpClient下载文件（使用较长的超时时间）
-                        using var downloadClient = new HttpClient
-                        {
-                            Timeout = TimeSpan.FromMinutes(10) // 设置10分钟超时
-                        };
-                        
-                        // 使用带进度报告的下载方法
-                        await DownloadFileWithProgressForGUIAsync(downloadClient, redirectUrl, fullPath);
-                        
-                        return true;
-                    }
-                }
-                
-                return false;
-            }
-            catch (Exception ex)
-            {
-                DownloadProgressChanged?.Invoke(-1, $"下载出错: {ex.Message}");
-                return false;
-            }
-        }
-        
-        /// <summary>
-        /// 下载书籍（用于GUI）
-        /// </summary>
-        /// <param name="book">要下载的书籍信息</param>
-        /// <param name="savePath">保存路径</param>
-        /// <returns>是否下载成功</returns>
-        public static async Task<bool> DownloadBookForGUI(BookInfo book, string savePath)
-        {
-            if (book == null)
-            {
-                DownloadProgressChanged?.Invoke(-1, "书籍信息为空，无法下载");
-                return false;
-            }
-            
-            return await DownloadBookForGUI(book.DownloadUrl!, savePath, book.Title, book.Extension);
-        }
-        
+
         /// <summary>
         /// 下载书籍并返回字节数组
         /// </summary>
@@ -1061,6 +852,130 @@ namespace Zlibrary.Noproxy
             {
                 Console.WriteLine($"下载书籍时出错: {ex.Message}");
                 return null;
+            }
+        }
+        
+        /// <summary>
+        /// 下载书籍并返回字节数组（支持进度报告）
+        /// </summary>
+        /// <param name="book">要下载的书籍信息</param>
+        /// <returns>书籍文件的字节数组</returns>
+        public static async Task<byte[]?> DownloadBookWithProgress(BookInfo book)
+        {
+            if (book == null)
+            {
+                DownloadProgressChanged?.Invoke(-1, "书籍信息为空，无法下载");
+                return null;
+            }
+            
+            return await DownloadBookWithProgress(book.DownloadUrl!);
+        }
+        
+        /// <summary>
+        /// 下载书籍并返回字节数组（支持进度报告）
+        /// </summary>
+        /// <param name="downloadUrl">下载链接</param>
+        /// <returns>书籍文件的字节数组</returns>
+        public static async Task<byte[]?> DownloadBookWithProgress(string downloadUrl)
+        {
+            try
+            {
+                // 替换URL中的域名为IP地址
+                string url = downloadUrl.Replace(ORIGIN_DOMAIN, ACTUAL_IP);
+                
+                // 创建不自动重定向的HttpClient
+                using var redirectClient = CreateNewClient(allowAutoRedirect: false);
+                
+                // 发送请求获取重定向URL
+                var response = await redirectClient.GetAsync(url);
+                
+                // 检查是否为重定向
+                if (response.StatusCode == HttpStatusCode.Found || 
+                    response.StatusCode == HttpStatusCode.Redirect || 
+                    response.StatusCode == HttpStatusCode.MovedPermanently || 
+                    response.StatusCode == HttpStatusCode.TemporaryRedirect)
+                {
+                    var location = response.Headers.Location;
+                    if (location != null)
+                    {
+                        string redirectUrl = location.ToString();
+                        
+                        // 创建新的HttpClient下载文件（使用较长的超时时间）
+                        using var downloadClient = new HttpClient
+                        {
+                            Timeout = TimeSpan.FromMinutes(10) // 设置10分钟超时
+                        };
+                        
+                        // 使用带进度报告的下载方法
+                        byte[] fileBytes = await DownloadFileWithProgressAsync(downloadClient, redirectUrl);
+                        return fileBytes;
+                    }
+                }
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                DownloadProgressChanged?.Invoke(-1, $"下载书籍时出错: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// 带进度报告的文件下载方法
+        /// </summary>
+        /// <param name="client">HttpClient实例</param>
+        /// <param name="url">下载URL</param>
+        /// <returns>文件字节数组</returns>
+        private static async Task<byte[]> DownloadFileWithProgressAsync(HttpClient client, string url)
+        {
+            try
+            {
+                // 发送请求获取响应
+                using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                
+                // 获取文件总大小
+                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                
+                // 创建内存流来存储文件数据
+                using var memoryStream = new MemoryStream();
+                using var contentStream = await response.Content.ReadAsStreamAsync();
+                
+                // 准备下载
+                byte[] buffer = new byte[8192]; // 8KB缓冲区
+                long totalBytesRead = 0;
+                int bytesRead;
+                
+                // 读取数据流并写入内存流
+                while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    await memoryStream.WriteAsync(buffer, 0, bytesRead);
+                    totalBytesRead += bytesRead;
+                    
+                    // 报告进度
+                    if (totalBytes > 0)
+                    {
+                        // 计算进度百分比
+                        double percentage = (double)totalBytesRead / totalBytes * 100;
+                        string message = $"已下载: {FormatFileSize(totalBytesRead)}/{FormatFileSize(totalBytes)}";
+                        DownloadProgressChanged?.Invoke(percentage, message);
+                    }
+                    else
+                    {
+                        // 如果不知道总大小，只显示已下载大小
+                        string message = $"已下载: {FormatFileSize(totalBytesRead)}";
+                        DownloadProgressChanged?.Invoke(-1, message); // -1表示未知进度
+                    }
+                }
+                
+                DownloadProgressChanged?.Invoke(100, "下载完成");
+                return memoryStream.ToArray();
+            }
+            catch (Exception ex)
+            {
+                DownloadProgressChanged?.Invoke(-1, $"下载出错: {ex.Message}");
+                throw;
             }
         }
         

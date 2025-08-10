@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Zlibrary.Noproxy.Avalonia.Android
 {
     [Activity(
-        Label = "Zlibrary.Noproxy.Avalonia.Android",
+        Label = "Zlibrary下载器",
         Theme = "@style/MyTheme.NoActionBar",
         Icon = "@drawable/icon",
         MainLauncher = true,
