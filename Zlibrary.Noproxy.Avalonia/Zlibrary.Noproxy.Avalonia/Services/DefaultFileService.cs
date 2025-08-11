@@ -77,16 +77,29 @@ namespace Zlibrary.Noproxy.Avalonia.Services
                 if (!File.Exists(filePath))
                     return false;
 
-#if WINDOWS
-                // Windows平台使用explorer打开文件
-                System.Diagnostics.Process.Start("explorer.exe", $"\"{filePath}\"");
-#elif MACOS
-                // macOS平台使用open命令打开文件
-                System.Diagnostics.Process.Start("open", $"\"{filePath}\"");
-#else
-                // Linux平台使用xdg-open打开文件
-                System.Diagnostics.Process.Start("xdg-open", $"\"{filePath}\"");
-#endif
+                // 使用 Avalonia 的 Launcher API (需要引用 Avalonia.Desktop)
+                // 这种方式更加可靠和现代化
+                var uri = new Uri(filePath);
+                // 注意：这需要根据实际的 Avalonia 版本和可用 API 调整
+                // Avalonia.Platform.PlatformManager?.Launcher?.LaunchUri(uri);
+
+                // 或者使用更简单的方式
+                if (OperatingSystem.IsWindows())
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd", $"/c start \"\" \"{filePath}\"")
+                    {
+                        CreateNoWindow = true
+                    });
+                }
+                else if (OperatingSystem.IsMacOS())
+                {
+                    System.Diagnostics.Process.Start("open", $"\"{filePath}\"");
+                }
+                else if (OperatingSystem.IsLinux())
+                {
+                    System.Diagnostics.Process.Start("xdg-open", $"\"{filePath}\"");
+                }
+
                 return true;
             }
             catch

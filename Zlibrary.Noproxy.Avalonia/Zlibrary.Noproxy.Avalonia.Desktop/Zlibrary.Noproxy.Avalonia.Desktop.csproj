@@ -7,6 +7,15 @@
     <Nullable>enable</Nullable>
 	<ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+	  <AssemblyName>Zlibrary下载器</AssemblyName>
+	  <!-- 可选：也可以设置产品名称 -->
+	  <Product>Zlibrary下载工具</Product>
+	  <AssemblyTitle>Zlibrary下载工具</AssemblyTitle>
+	  <AssemblyDescription>用于下载Zlibrary书籍的工具</AssemblyDescription>
+	  <AssemblyCompany>EliorFoy Company</AssemblyCompany>
+	  <AssemblyCopyright>Copyright © 2025</AssemblyCopyright>
+	  <AssemblyVersion>1.0.0.0</AssemblyVersion>
+	  <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup>

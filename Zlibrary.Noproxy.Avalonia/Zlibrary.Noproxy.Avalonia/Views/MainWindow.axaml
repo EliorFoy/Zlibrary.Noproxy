@@ -134,7 +134,8 @@
                 <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.BookSearch}" />
             </suki:SukiSideMenuItem.Icon>
             <suki:SukiSideMenuItem.PageContent>
-                <views:BookSearchView x:Name="BookSearchView" />
+                <views:BookSearchView x:Name="BookSearchView" 
+									  DataContext="{Binding BookSearchViewModel}"/>
             </suki:SukiSideMenuItem.PageContent>
         </suki:SukiSideMenuItem>
         <suki:SukiSideMenuItem Classes="Compact" Header="下载" x:Name="DownloadMenuItem">
@@ -143,7 +144,8 @@
                 <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.Download}" />
             </suki:SukiSideMenuItem.Icon>
             <suki:SukiSideMenuItem.PageContent>
-                <views:BookDownloadView x:Name="BookDownloadView" />
+                <views:BookDownloadView x:Name="BookDownloadView" 
+										DataContext="{Binding BookDownloadViewModel}"/>
             </suki:SukiSideMenuItem.PageContent>
         </suki:SukiSideMenuItem>
         <suki:SukiSideMenuItem Classes="Compact" Header="日志">
@@ -151,7 +153,8 @@
                 <avalonia:MaterialIcon Kind="{x:Static materialIcons:MaterialIconKind.FileDocument}" />
             </suki:SukiSideMenuItem.Icon>
             <suki:SukiSideMenuItem.PageContent>
-                <views:LogView />
+                <views:LogView 
+					DataContext="{Binding LogViewModel}"/>
             </suki:SukiSideMenuItem.PageContent>
         </suki:SukiSideMenuItem>
     </sukiUi:SukiSideMenu> 

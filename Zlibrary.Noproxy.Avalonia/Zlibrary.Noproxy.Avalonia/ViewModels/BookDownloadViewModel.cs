@@ -109,18 +109,7 @@ namespace Zlibrary.Noproxy.Avalonia.ViewModels
         [RelayCommand]
         private async Task OpenDownloadedFile()
         {
-            if (string.IsNullOrWhiteSpace(DownloadedFilePath))
-            {
-                DownloadMessage = "未找到下载文件路径";
-                return;
-            }
-            
-            if (!File.Exists(DownloadedFilePath))
-            {
-                DownloadMessage = "文件不存在";
-                return;
-            }
-            
+        
             try
             {
                 // 通过DownloadManager处理文件打开操作
