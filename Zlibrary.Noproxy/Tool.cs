@@ -14,6 +14,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Linq;
 using System.IO;
+using System.Diagnostics;
 
 namespace Zlibrary.Noproxy
 {
@@ -49,6 +50,8 @@ namespace Zlibrary.Noproxy
         
         private static readonly SocketsHttpHandler _handler = new SocketsHttpHandler
         {
+            // 禁用系统代理
+            UseProxy = false,
             // 禁用证书验证
             SslOptions = new SslClientAuthenticationOptions
             {
@@ -121,16 +124,20 @@ namespace Zlibrary.Noproxy
         }
 
         /// <summary>
-        /// 创建一个新的HttpClient实例，配置与默认_client相同
+        /// 创建一个新的HttpClient实例
         /// </summary>
         /// <param name="allowAutoRedirect">是否允许自动重定向</param>
         /// <param name="timeout">超时时间（秒）</param>
+        /// <param name="userKey">用户密钥（可选）</param>
+        /// <param name="userId">用户ID（可选）</param>
         /// <returns>配置好的新HttpClient实例</returns>
-        private static HttpClient CreateNewClient(bool allowAutoRedirect = true, int timeout = 10)
+        public static HttpClient CreateNewClient(bool allowAutoRedirect = true, int timeout = 10, string? userKey = null, int? userId = null, bool noCookie = false)
         {
             // 创建与_handler相同配置的新handler
             var handler = new SocketsHttpHandler
             {
+                // 禁用系统代理
+                UseProxy = false,
                 // 禁用证书验证
                 SslOptions = new SslClientAuthenticationOptions
                 {
@@ -168,12 +175,61 @@ namespace Zlibrary.Noproxy
             client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
             client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36");
-            client.DefaultRequestHeaders.Add("Cookie", "remix_userkey=a097500143c397d1c09c8c4c459bb142; remix_userid=35246529; selectedSiteMode=books");
             
+            // 添加Cookie头
+            if (noCookie != true)
+            {
+                if (!string.IsNullOrEmpty(userKey) && userId.HasValue)
+                {
+                    // 使用指定的用户信息创建Cookie
+                    string cookie = $"remix_userkey={userKey}; remix_userid={userId}; selectedSiteMode=books";
+                    client.DefaultRequestHeaders.Add("Cookie", cookie);
+                }
+                else
+                {
+                    // 使用默认的Cookie
+                    client.DefaultRequestHeaders.Add("Cookie", "remix_userkey=a097500143c397d1c09c8c4c459bb142; remix_userid=35246529; selectedSiteMode=books");
+                }
+            }
+
             // 设置超时
             client.Timeout = TimeSpan.FromSeconds(timeout);
             
             return client;
+        }
+
+        /// <summary>
+        /// 更新默认HttpClient的Cookie
+        /// </summary>
+        /// <param name="userKey">用户密钥</param>
+        /// <param name="userId">用户ID</param>
+        public static void UpdateCookie(string userKey, int userId)
+        {
+            // 移除旧的Cookie头
+            if (_client.DefaultRequestHeaders.Contains("Cookie"))
+            {
+                _client.DefaultRequestHeaders.Remove("Cookie");
+            }
+            
+            // 添加新的Cookie头
+            string newCookie = $"remix_userkey={userKey}; remix_userid={userId}; selectedSiteMode=books";
+            _client.DefaultRequestHeaders.Add("Cookie", newCookie);
+        }
+
+        /// <summary>
+        /// 从AccountPool中获取账号并更新默认HttpClient的Cookie
+        /// </summary>
+        /// <param name="accountPool">账号池实例</param>
+        /// <returns>是否成功更新Cookie</returns>
+        public static bool UpdateCookieFromAccountPool(AccountPool accountPool)
+        {
+            var account = accountPool.GetRandomAccount();
+            if (account != null)
+            {
+                UpdateCookie(account.UserKey, account.UserId);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -551,10 +607,23 @@ namespace Zlibrary.Noproxy
                 
                 // 替换URL中的域名为IP地址
                 string url = downloadUrl.Replace(ORIGIN_DOMAIN, ACTUAL_IP);
-                
-                // 创建不自动重定向的HttpClient
-                using var redirectClient = CreateNewClient(allowAutoRedirect: false);
-                
+
+                // 从账号池获取账号并创建带Cookie的HttpClient
+                AccountPool accountPool = new AccountPool();
+                var account = await accountPool.GetRandomAccountWithAutoRegisterAsync();
+                Debug.WriteLine($"使用账号 - Key: {account.UserKey}, Id: {account.UserId}");
+                HttpClient redirectClient;
+                if (account != null)
+                {
+                    // 使用从账号池获取的账号创建HttpClient
+                    redirectClient = CreateNewClient(allowAutoRedirect: false, userKey: account.UserKey, userId: account.UserId);
+                }
+                else
+                {
+                    // 如果无法获取账号，则使用默认的客户端
+                    redirectClient = CreateNewClient(allowAutoRedirect: false);
+                }
+
                 try
                 {
                     // 发送请求获取重定向URL
@@ -817,32 +886,48 @@ namespace Zlibrary.Noproxy
                 // 替换URL中的域名为IP地址
                 string url = downloadUrl.Replace(ORIGIN_DOMAIN, ACTUAL_IP);
                 
-                // 创建不自动重定向的HttpClient
-                using var redirectClient = CreateNewClient(allowAutoRedirect: false);
+                // 从账号池获取账号并创建带Cookie的HttpClient
+                AccountPool accountPool = new AccountPool();
+                var account = await accountPool.GetRandomAccountWithAutoRegisterAsync();
+                Debug.WriteLine($"使用账号 - Key: {account.UserKey}, Id: {account.UserId}");
+                HttpClient redirectClient;
+                if (account != null)
+                {
+                    // 使用从账号池获取的账号创建HttpClient
+                    redirectClient = CreateNewClient(allowAutoRedirect: false, userKey: account.UserKey, userId: account.UserId);
+                }
+                else
+                {
+                    // 如果无法获取账号，则使用默认的客户端
+                    redirectClient = CreateNewClient(allowAutoRedirect: false);
+                }
                 
                 // 发送请求获取重定向URL
-                var response = await redirectClient.GetAsync(url);
-                
-                // 检查是否为重定向
-                if (response.StatusCode == HttpStatusCode.Found || 
-                    response.StatusCode == HttpStatusCode.Redirect || 
-                    response.StatusCode == HttpStatusCode.MovedPermanently || 
-                    response.StatusCode == HttpStatusCode.TemporaryRedirect)
+                using (redirectClient)
                 {
-                    var location = response.Headers.Location;
-                    if (location != null)
+                    var response = await redirectClient.GetAsync(url);
+                    
+                    // 检查是否为重定向
+                    if (response.StatusCode == HttpStatusCode.Found || 
+                        response.StatusCode == HttpStatusCode.Redirect || 
+                        response.StatusCode == HttpStatusCode.MovedPermanently || 
+                        response.StatusCode == HttpStatusCode.TemporaryRedirect)
                     {
-                        string redirectUrl = location.ToString();
-                        
-                        // 创建新的HttpClient下载文件（使用较长的超时时间）
-                        using var downloadClient = new HttpClient
+                        var location = response.Headers.Location;
+                        if (location != null)
                         {
-                            Timeout = TimeSpan.FromMinutes(10) // 设置10分钟超时
-                        };
-                        
-                        // 下载并返回字节数组
-                        byte[] fileBytes = await downloadClient.GetByteArrayAsync(redirectUrl);
-                        return fileBytes;
+                            string redirectUrl = location.ToString();
+                            
+                            // 创建新的HttpClient下载文件（使用较长的超时时间）
+                            using var downloadClient = new HttpClient
+                            {
+                                Timeout = TimeSpan.FromMinutes(10) // 设置10分钟超时
+                            };
+                            
+                            // 下载并返回字节数组
+                            byte[] fileBytes = await downloadClient.GetByteArrayAsync(redirectUrl);
+                            return fileBytes;
+                        }
                     }
                 }
                 
@@ -1102,6 +1187,74 @@ namespace Zlibrary.Noproxy
                 ProgressBarStyle.Star => ('*', '.'),
                 _ => ('=', '.')
             };
+        }
+        
+        /// <summary>
+        /// 下载书籍并写入到指定的流中
+        /// </summary>
+        /// <param name="downloadUrl">下载链接</param>
+        /// <param name="destinationStream">目标流</param>
+        /// <returns>是否下载成功</returns>
+        public static async Task<bool> DownloadBookToStream(string downloadUrl, Stream destinationStream)
+        {
+            try
+            {
+                // 替换URL中的域名为IP地址
+                string url = downloadUrl.Replace(ORIGIN_DOMAIN, ACTUAL_IP);
+                
+                // 从账号池获取账号并创建带Cookie的HttpClient
+                AccountPool accountPool = new AccountPool();
+                var account = await accountPool.GetRandomAccountWithAutoRegisterAsync();
+                
+                HttpClient redirectClient;
+                if (account != null)
+                {
+                    // 使用从账号池获取的账号创建HttpClient
+                    redirectClient = CreateNewClient(allowAutoRedirect: false, userKey: account.UserKey, userId: account.UserId);
+                }
+                else
+                {
+                    // 如果无法获取账号，则使用默认的客户端
+                    redirectClient = CreateNewClient(allowAutoRedirect: false);
+                }
+                
+                // 发送请求获取重定向URL
+                using (redirectClient)
+                {
+                    var response = await redirectClient.GetAsync(url);
+                    
+                    // 检查是否为重定向
+                    if (response.StatusCode == HttpStatusCode.Found || 
+                        response.StatusCode == HttpStatusCode.Redirect || 
+                        response.StatusCode == HttpStatusCode.MovedPermanently || 
+                        response.StatusCode == HttpStatusCode.TemporaryRedirect)
+                    {
+                        var location = response.Headers.Location;
+                        if (location != null)
+                        {
+                            string redirectUrl = location.ToString();
+                            
+                            // 创建新的HttpClient下载文件（使用较长的超时时间）
+                            using var downloadClient = new HttpClient
+                            {
+                                Timeout = TimeSpan.FromMinutes(10) // 设置10分钟超时
+                            };
+                            
+                            // 下载并写入到指定流中
+                            using var contentStream = await downloadClient.GetStreamAsync(redirectUrl);
+                            await contentStream.CopyToAsync(destinationStream);
+                            return true;
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"下载书籍时出错: {ex.Message}");
+                return false;
+            }
         }
     }
 }

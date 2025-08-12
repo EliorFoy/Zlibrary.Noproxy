@@ -87,7 +87,7 @@ namespace Zlibrary.AccountPool
                 if (key.KeyChar == 'y' || key.KeyChar == 'Y')
                 {
                     Console.WriteLine("开始注册Z-Library账号...");
-                    string password = "WenHao0425"; // 默认密码
+                    string password = "1145141919810^-^"; // 默认密码
                     string name = "Elior"; // 默认用户名
                     
                     // 保存注册信息，以便后续提交验证码时使用
